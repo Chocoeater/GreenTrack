@@ -19,10 +19,10 @@ class Plant(models.Model):
 
     name = models.CharField(max_length=200, verbose_name='Имя растения', help_text='Введите имя растения')
     species = models.CharField(max_length=200, verbose_name='Вид растения', help_text='Введите вид растения')
-    image = models.ImageField(upload_to='images/', verbose_name='Изображение растения', help_text='Загрузите изображение растения')
+    image = models.ImageField(upload_to='images/plants/user_{user_id}/', verbose_name='Изображение растения', help_text='Загрузите изображение растения', null=True, blank=True)
     notes = models.TextField(verbose_name='Заметки', help_text='Введите заметки о растении', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='plants')
 
     def __str__(self):
         """
