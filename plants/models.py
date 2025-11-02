@@ -4,6 +4,19 @@ from django.db import models
 User = get_user_model()
 
 class Plant(models.Model):
+    """
+    Модель для представления растения в системе.
+
+    Attributes:
+        name (CharField): Название растения. Ограничено 200 символами.
+        species (CharField): Вид растения. Ограничено 200 символами.
+        image (ImageField): Изображение растения, загружаемое в папку 'images/'.
+        notes (TextField): Дополнительные заметки о растении. Поле необязательное.
+        created_at (DateTimeField): Дата и время создания записи. Автоматически устанавливается при создании.
+        user (ForeignKey): Связь с пользователем, который добавил растение. При удалении пользователя,
+                          все его растения также удаляются.
+    """
+
     name = models.CharField(max_length=200, verbose_name='Имя растения', help_text='Введите имя растения')
     species = models.CharField(max_length=200, verbose_name='Вид растения', help_text='Введите вид растения')
     image = models.ImageField(upload_to='images/', verbose_name='Изображение растения', help_text='Загрузите изображение растения')
@@ -12,6 +25,12 @@ class Plant(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
+        """
+        Возвращает строковое представление растения (его имя).
+
+        Returns:
+            str: Имя растения.
+        """
         return self.name
 
     class Meta:
