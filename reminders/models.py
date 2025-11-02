@@ -1,45 +1,7 @@
 from django.db import models
-from care.models import CareType
-from plants.models import Plant
 
+from care.models import CareTask
 
-class CareTask(models.Model):
-    """
-    Модель для отслеживания задач по уходу за растениями.
-
-    Attributes:
-        plant (Plant): Растение, для которого назначена задача по уходу.
-                       Связь с моделью Plant через внешний ключ. При удалении
-                       растения, все связанные задачи также удаляются.
-        care_task (CareType): Тип ухода (например, полив, удобрение).
-                              Связь с моделью CareType через внешний ключ.
-                              При удалении типа ухода, связанные задачи удаляются.
-        last_done (datetime): Дата и время последнего выполнения задачи.
-                             Может быть пустым, если задача ещё не выполнялась.
-        next_due (datetime): Дата и время следующего запланированного выполнения задачи.
-                             Может быть пустым, если дата не установлена.
-        is_active (bool): Флаг активности задачи. По умолчанию True.
-                          Позволяет деактивировать задачу без её удаления.
-    """
-
-    plant = models.ForeignKey(Plant, on_delete=models.CASCADE, verbose_name="Растение", related_name="care_tasks")
-    care_type = models.ForeignKey(CareType, on_delete=models.CASCADE, verbose_name="Уход", related_name="care_tasks")
-    last_done = models.DateTimeField(verbose_name="Дата и время последнего выполнения", null=True, blank=True)
-    next_due = models.DateTimeField(verbose_name="Дата и время следующего выполнения", null=True, blank=True)
-    is_active = models.BooleanField(verbose_name="Активность", default=True)
-    
-    class Meta:
-        verbose_name = "Уход"
-        verbose_name_plural = "Уходы"
-    
-    def __str__(self):
-        """
-        Возвращает строковое представление задачи по уходу.
-
-        Returns:
-            str: Строка в формате 'Имя растения - Название типа ухода'.
-        """
-        return f"{self.plant.name} - {self.care_task.name}"
 
 class CareTaskLog(models.Model):
     """
