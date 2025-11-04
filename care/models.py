@@ -23,7 +23,6 @@ class CareType(models.Model):
     """
 
     name = models.CharField(max_length=255, unique=True, null=False, blank=False, verbose_name="Тип ухода", help_text="Введите тип ухода")
-    frequency_days = models.PositiveIntegerField(default=1, null=False, blank=False, verbose_name="Частота ухода (в днях)", help_text="Введите частоту ухода в днях (по умолчанию 1 день)")
     description = models.TextField(null=True, blank=True, verbose_name="Описание", help_text="Введите рекомендации по типу ухода")
     is_default = models.BooleanField(default=False, verbose_name="По умолчанию", help_text="Отметьте, если это тип ухода по умолчанию")
     order = models.PositiveIntegerField(default=0, verbose_name="Порядок", help_text="Укажите порядок отображения типов ухода")
@@ -81,6 +80,9 @@ class CareTask(models.Model):
     last_done = models.DateField(verbose_name="Дата последнего выполнения", null=True, blank=True)
     next_due = models.DateField(verbose_name="Дата следующего выполнения", null=True, blank=True)
     is_active = models.BooleanField(verbose_name="Активность", default=True)
+    frequency_days = models.PositiveIntegerField(default=1, blank=False,
+                                                 verbose_name="Частота задачи (в днях)",
+                                                 help_text="Введите частоту задачи в днях (по умолчанию 1 день)")
 
     class Meta:
         verbose_name = "Задача по уходу"
@@ -109,6 +111,45 @@ class CareTask(models.Model):
             Метод вызывает save() с указанием поля 'next_due', чтобы избежать
             лишних операций при обновлении.
         """
-        if self.last_done and self.care_type.frequency_days:
-            self.next_due = self.last_done + timedelta(days=self.care_type.frequency_days)
+        if self.last_done and self.frequency_days:
+            self.next_due = self.last_done + timedelta(days=self.frequency_days)
             self.save(update_fields=['next_due'])
+
+
+class CareTaskLog(models.Model):
+    """
+    Модель для журналирования выполнения задач по уходу за растениями.
+
+    Каждая запись в журнале фиксирует факт выполнения определённой задачи по уходу
+    (например, полив, опрыскивание) в определённое время, а также может содержать
+    дополнительные заметки о выполнении.
+
+    Attributes:
+        care_task (CareTask): Ссылка на задачу по уходу, которая была выполнена.
+                              При удалении задачи все связанные записи в журнале
+                              также удаляются. Отображается как 'Задача по уходу'.
+        performed_at (datetime): Дата и время выполнения задачи. Устанавливается
+                                 автоматически при создании записи (auto_now_add=True).
+                                 Отображается как 'Дата и время выполнения'.
+        notes (str): Дополнительные заметки, которые пользователь может добавить
+                     при выполнении задачи. Поле необязательное. Отображается как 'Заметки'.
+    """
+
+    care_task = models.ForeignKey(CareTask, on_delete=models.CASCADE, related_name="logs",
+                                  verbose_name="Задача по уходу")
+    performed_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата и время выполнения")
+    notes = models.TextField(blank=True, verbose_name="Заметки")
+
+    class Meta:
+        verbose_name = "Журнал выполнения ухода"
+        verbose_name_plural = "Журналы выполнения уходов"
+        ordering = ['-performed_at']
+
+    def __str__(self):
+        """
+        Возвращает строковое представление записи в журнале.
+
+        Returns:
+            str: Строка в формате 'Имя растения - Название ухода - Дата и время выполнения'.
+        """
+        return f"{self.care_task} — {self.performed_at.strftime('%d.%m.%Y %H:%M')}"
