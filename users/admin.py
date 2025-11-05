@@ -5,26 +5,36 @@ from .models import User
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):
-    # Поля, отображаемые в списке пользователей
+    """
+    Кастомная админ-панель для модели пользователя.
+
+    Добавляет дополнительные поля в интерфейс администратора Django:
+    - Часовой пояс (timezone)
+    - Настройки уведомлений (notification_preferences)
+
+    Attributes:
+        list_display (tuple): Поля, отображаемые в списке пользователей.
+        list_filter (tuple): Фильтры, доступные в боковой панели.
+        search_fields (tuple): Поля, по которым возможен поиск.
+        ordering (tuple): Порядок сортировки записей в списке.
+        fieldsets (tuple): Определение групп полей при редактировании пользователя.
+        add_fieldsets (tuple): Определение групп полей при создании нового пользователя.
+    """
+
     list_display = ('username', 'email', 'timezone', 'notification_preferences', 'is_active', 'is_staff')
 
-    # Фильтры справа
     list_filter = ('timezone', 'notification_preferences', 'is_active', 'is_staff', 'is_superuser')
 
-    # Поля для поиска
     search_fields = ('username', 'email', 'first_name', 'last_name')
 
-    # Порядок сортировки
     ordering = ('username',)
 
-    # Группировка полей при редактировании
     fieldsets = UserAdmin.fieldsets + (
         ("Уведомления", {
             "fields": ("timezone", "notification_preferences")
         }),
     )
 
-    # Группировка полей при создании
     add_fieldsets = UserAdmin.add_fieldsets + (
         ("Уведомления", {
             "fields": ("timezone", "notification_preferences"),

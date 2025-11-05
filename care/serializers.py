@@ -25,7 +25,7 @@ class CareTaskSerializer(serializers.ModelSerializer):
     
     Преобразует объекты модели CareTask в JSON-представление и обратно.
     
-    Поля:
+    Fields:
         id (int): Уникальный идентификатор задачи по уходу.
         plant (int): Ссылка на растение, для которого создана задача.
         care_type (int): Тип ухода (полив, подкормка и т.д.).
@@ -34,7 +34,7 @@ class CareTaskSerializer(serializers.ModelSerializer):
         is_active (bool): Активна ли задача.
         frequency_days (int): Периодичность выполнения задачи в днях.
     
-    Поля только для чтения:
+    Read-only Fields:
         next_due: Вычисляется автоматически на основе last_done и frequency_days.
     """
 
