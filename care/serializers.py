@@ -22,20 +22,23 @@ class CareTypeSerializer(serializers.ModelSerializer):
 class CareTaskSerializer(serializers.ModelSerializer):
     """
     Сериализатор для модели CareTask.
-    
+
     Преобразует объекты модели CareTask в JSON-представление и обратно.
-    
-    Fields:
-        id (int): Уникальный идентификатор задачи по уходу.
-        plant (int): Ссылка на растение, для которого создана задача.
-        care_type (int): Тип ухода (полив, подкормка и т.д.).
-        last_done (date): Дата последнего выполнения задачи.
-        next_due (date): Дата следующего предполагаемого выполнения (только для чтения).
-        is_active (bool): Активна ли задача.
-        frequency_days (int): Периодичность выполнения задачи в днях.
-    
-    Read-only Fields:
-        next_due: Вычисляется автоматически на основе last_done и frequency_days.
+    Поддерживает валидацию полей и вычисление автоматических значений.
+
+    Поля:
+        id (int): Уникальный идентификатор задачи по уходу. Автоматически генерируется при создании.
+        plant (int): Ссылка на растение (внешний ключ), для которого создана задача. Обязательное поле.
+        care_type (int): Тип ухода (например, полив, подкормка). Ссылка на модель CareType. Обязательное поле.
+        last_done (date): Дата последнего выполнения задачи. Используется для расчёта следующего срока.
+        next_due (date): Ожидаемая дата следующего выполнения задачи. Поле только для чтения, вычисляется автоматически.
+        is_active (bool): Флаг активности задачи. Если False — задача временно отключена.
+        frequency_days (int): Периодичность выполнения задачи в днях. Определяет интервал между уходами.
+
+    Дополнительные настройки (extra_kwargs):
+        - 'plant': обязательное поле.
+        - 'care_type': обязательное поле.
+        - 'next_due': обязательное поле, в дальнейшем будет вычисляться автоматически.
     """
 
     class Meta:
@@ -49,4 +52,9 @@ class CareTaskSerializer(serializers.ModelSerializer):
             'is_active',
             'frequency_days'
         ]
-        read_only_fields = ['next_due']
+        
+        extra_kwargs = {
+            'plant': {'required': True},
+            'care_type': {'required': True},
+            'next_due': {'required': True},
+        }

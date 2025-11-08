@@ -50,7 +50,6 @@ class CareTaskAdmin(admin.ModelAdmin):
     list_filter = ('is_active', 'care_type', 'next_due', 'last_done')
     search_fields = ('plant__name', 'care_type__name', 'plant__species')
     autocomplete_fields = ['plant']
-    readonly_fields = ('next_due',)
     ordering = ('-next_due',)
 
     fieldsets = (
