@@ -45,7 +45,7 @@ def mark_task_as_done(task: User, notes: str = "") -> CareTask:
     return task
 
 def send_daily_care(user: User, due_tasks: list[CareTask]) -> bool:
-    if not due_tasks.exists():
+    if not due_tasks:
         return False
 
     subject = "Ежедневное напоминание о уходе"
