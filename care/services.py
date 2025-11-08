@@ -1,8 +1,10 @@
 from datetime import date, timedelta
 
+from django.core.mail import send_mail
 from rest_framework.exceptions import ValidationError
 
 from care.models import CareTask, CareTaskLog
+from tracker import settings
 from users.models import User
 
 
@@ -64,15 +66,15 @@ def send_daily_care(user: User, due_tasks: list[CareTask]) -> bool:
     )
 
     print('ОТПРАВКА СООБЩЕНИЯ: ' + '\n' + message)
-    # try:
-    #     send_mail(
-    #         subject=subject,
-    #         message=message,
-    #         from_email=settings.DEFAULT_FROM_EMAIL,
-    #         recipient_list=[user.email],
-    #         fail_silently=False,
-    #     )
-    #     return True
-    # except Exception as e:
-    #     print(f"Ошибка отправки сводного напоминания: {e}")
-    #     return False
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+        return True
+    except Exception as e:
+        print(f"Ошибка отправки сводного напоминания для {user.email}: {e}")
+        return False
