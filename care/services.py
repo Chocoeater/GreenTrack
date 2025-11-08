@@ -7,7 +7,7 @@ from users.models import User
 
 
 
-def mark_task_as_done(task: User, notes: str = "") -> CareTask:
+def mark_task_as_done(task: CareTask, notes: str = "") -> CareTask:
     """
     Отмечает задачу по уходу как выполненную на текущий день.
 

@@ -54,7 +54,7 @@ class CareTaskViewSet(viewsets.ModelViewSet):
         """
         plant = serializer.validated_data['plant']
         if plant.user != self.request.user:
-            raise serializers.ValidationError("Вы не можете создать задачу для чужого растения")
+            raise ValidationError("Вы не можете создать задачу для чужого растения")
         serializer.save()
 
     @action(detail=True, methods=['post'], url_path='done')
