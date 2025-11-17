@@ -1,0 +1,86 @@
+services:
+  back:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn tracker.wsgi:application --bind 0.0.0.0:8000
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    expose:
+      - "8000"
+    depends_on:
+      - db
+
+  collectstatic:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python manage.py collectstatic --noinput
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - back
+
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - back
+      - collectstatic
+
+  db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A tracker worker -l info
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: celery -A tracker beat -l info
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:
+  static_volume:
+  media_volume:
