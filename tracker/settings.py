@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'django_celery_beat',
+    'drf_spectacular',
     # Apps
     'care',
     'plants',
@@ -146,8 +147,9 @@ SIMPLE_JWT = {
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication' # ← добавь это
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',
     # ],
@@ -185,3 +187,10 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR/'media'
 
 # SECURE_PROXY_SSL_HEADER = ("X-Forwarded-Proto", "https")
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'GreenTrack API',
+    'DESCRIPTION': 'Приложение для отслеживания ухода за растениями',
+    'VERSION': '0.0.1',
+    'SERVE_INCLUDE_SCHEMA': False,
+}

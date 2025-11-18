@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
@@ -22,7 +23,32 @@ class CareTypeViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = serializers.CareTypeSerializer
     permission_classes = [IsAuthenticated]
 
-
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список задач по уходу",
+        description="Возвращает список задач по уходу за растениями текущего пользователя.",
+    ),
+    retrieve=extend_schema(
+        summary="Детали задачи по уходу",
+        description="Возвращает полную информацию о задаче по уходу.",
+    ),
+    create=extend_schema(
+        summary="Создание задачи по уходу",
+        description="Создает новую задачу по уходу за растением пользователя.",
+    ),
+    update=extend_schema(
+        summary="Обновление задачи по уходу",
+        description="Полное обновление информации о задаче по уходу.",
+    ),
+    partial_update=extend_schema(
+        summary="Частичное обновление задачи по уходу",
+        description="Частичное обновление информации о задаче по уходу.",
+    ),
+    destroy=extend_schema(
+        summary="Удаление задачи по уходу",
+        description="Удаляет задачу по уходу за растением.",
+    ),
+)
 class CareTaskViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления задачами по уходу за растениями.
@@ -33,6 +59,7 @@ class CareTaskViewSet(viewsets.ModelViewSet):
 
     serializer_class = serializers.CareTaskSerializer
     permission_classes = [IsAuthenticated]
+    queryset = CareTask.objects.all()  # Для spectacular
 
     def get_queryset(self):
         """
@@ -57,6 +84,60 @@ class CareTaskViewSet(viewsets.ModelViewSet):
             raise ValidationError("Вы не можете создать задачу для чужого растения")
         serializer.save()
 
+    @extend_schema(
+        summary="Отметить задачу как выполненную",
+        description="Отмечает задачу по уходу как выполненную и вычисляет следующую дату выполнения.",
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'notes': {'type': 'string', 'description': 'Заметки к выполненной задаче', 'required': False}
+                }
+            }
+        },
+        responses={
+            200: {
+                'type': 'object',
+                'properties': {
+                    'detail': {'type': 'string', 'example': 'Задача отмечена как выполненная'},
+                    'next_due': {'type': 'string', 'format': 'date-time', 'example': '2024-01-15T10:00:00Z'}
+                }
+            },
+            400: {
+                'type': 'object',
+                'properties': {
+                    'error': {'type': 'string', 'example': 'Текст ошибки валидации'}
+                }
+            }
+        },
+        examples=[
+            OpenApiExample(
+                'Пример успешного запроса',
+                summary='Запрос с заметками',
+                value={'notes': 'Полил растение утром'},
+                request_only=True
+            ),
+            OpenApiExample(
+                'Пример успешного ответа',
+                summary='Успешное выполнение',
+                value={
+                    'detail': 'Задача отмечена как выполненная',
+                    'next_due': '2024-01-17T10:00:00Z'
+                },
+                response_only=True,
+                status_codes=['200']
+            ),
+            OpenApiExample(
+                'Пример ошибки',
+                summary='Ошибка валидации',
+                value={
+                    'error': 'Нельзя отметить задачу как выполненную до наступления срока'
+                },
+                response_only=True,
+                status_codes=['400']
+            ),
+        ]
+    )
     @action(detail=True, methods=['post'], url_path='done')
     def mark_as_done(self, request, pk=None):
         """
