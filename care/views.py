@@ -9,7 +9,16 @@ from care import serializers
 from care.models import CareType, CareTask
 from care.services import mark_task_as_done
 
-
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список типов ухода",
+        description="Возвращает список типов ухода по умолчанию.",
+    ),
+    retrieve=extend_schema(
+        summary="Детали типа ухода",
+        description="Возвращает полную информацию о типе ухода.",
+    )
+)
 class CareTypeViewSet(viewsets.ReadOnlyModelViewSet):
     """
     ViewSet для модели CareType.
