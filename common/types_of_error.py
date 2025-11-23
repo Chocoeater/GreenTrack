@@ -1,0 +1,7 @@
+USER_NOT_FOUND = "user_not_found"
+INVALID_CREDENTIALS = "invalid_credentials"
+VALIDATION_ERROR = "validation_error"
+PERMISSION_DENIED = "permission_denied"
+NOT_FOUND = "not_found"
+CONFLICT = "conflict"
+SERVER_ERROR = "server_error"

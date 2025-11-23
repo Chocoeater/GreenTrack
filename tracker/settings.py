@@ -60,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "common.middleware.error_logging.ErrorLoggingMiddleware",
 ]
 
 ROOT_URLCONF = 'tracker.urls'
@@ -150,6 +151,7 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication'
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'EXCEPTION_HANDLER': 'common.exception_handler.custom_exception_handler',
     # 'DEFAULT_PERMISSION_CLASSES': [
     #     'rest_framework.permissions.IsAuthenticated',
     # ],
@@ -193,4 +195,37 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Приложение для отслеживания ухода за растениями',
     'VERSION': '0.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+# Настройки логирования
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "formatters": {
+        "verbose": {
+            "format": "[{levelname}] {asctime} {name}: {message}",
+            "style": "{",
+        },
+    },
+
+    "handlers": {
+        "errors_file": {
+            "class": "logging.FileHandler",
+            "filename": "logs/errors.log",
+            "formatter": "verbose",
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
+        },
+    },
+
+    "loggers": {
+        "errors": {
+            "handlers": ["errors_file", "console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
 }
