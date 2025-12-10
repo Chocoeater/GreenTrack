@@ -45,11 +45,12 @@ def test_mark_task_already_done(care_task):
 
     assert "уже выполнен" in str(exc.value).lower()
 
-
+@pytest.mark.django_db
 def test_send_daily_care_empty_return_false(user):
     result =  send_daily_care(user, due_tasks=[])
     assert result is False
 
+@pytest.mark.django_db
 @patch('care.services.send_mail')
 def test_send_daily_care_success(mock_send_mail, user, care_task):
     mock_send_mail.return_value = 1
@@ -64,6 +65,7 @@ def test_send_daily_care_success(mock_send_mail, user, care_task):
     assert "напоминание" in kwargs['subject']
 
 
+@pytest.mark.django_db
 @patch('care.services.send_mail')
 def test_send_daily_care_fail(mock_send_mail, user, care_task):
     mock_send_mail.side_effect = Exception('SMTP error')
